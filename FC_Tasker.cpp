@@ -23,7 +23,7 @@ FC_SimpleTasker::~FC_SimpleTasker()
 
 
 // Add a new task at the end of dynamically created array
-void FC_SimpleTasker::addFunction( functionPointerType funcPointer, long interv, uint16_t maxDur )
+void FC_SimpleTasker::addFunction(SimpleFunctionObject functionObject, long interv, uint16_t maxDur )
 {
 	// check if there is too much tasks
 	if (amtOfTasks+1 > MAX_AMT_OF_TASKS)
@@ -44,7 +44,7 @@ void FC_SimpleTasker::addFunction( functionPointerType funcPointer, long interv,
 	
 	// add new task at the end
 	taskList = newTaskList;
-	taskList[amtOfTasks-1].functionPointer = funcPointer;
+	taskList[amtOfTasks-1].functionObject = functionObject;
 	taskList[amtOfTasks-1].interval = interv;
 	taskList[amtOfTasks-1].maxDuration = maxDur;
 	taskList[amtOfTasks-1].lastExecuteTime = 0;
@@ -80,7 +80,8 @@ void FC_SimpleTasker::runTasker()
 		if (curTime > (taskList[i].lastExecuteTime + taskList[i].interval + taskList[i].timeShift))
 		{
 			taskList[i].lastExecuteTime = curTime;
-			(*taskList[i].functionPointer)();
+			//(*taskList[i].functionObject)();
+			taskList[i].functionObject.functionCall_concept();
 		}
 	}
 }
@@ -91,7 +92,7 @@ void FC_SimpleTasker::copyTaskList(Task *from, Task *to, uint8_t amount)
 {
 	for (int i=0; i < amount; i++)
 	{
-		to[i].functionPointer = from[i].functionPointer;
+		to[i].functionObject = from[i].functionObject;
 		to[i].interval = from[i].interval;
 		to[i].maxDuration = from[i].maxDuration;
 		to[i].lastExecuteTime = from[i].lastExecuteTime;
@@ -104,7 +105,7 @@ bool FC_SimpleTasker::checkIfContain(Task** source, int amt, Task* toCheck)
 {
 	for (int i=0; i<amt; i++)
 	{
-		if (source[i]->functionPointer == toCheck->functionPointer)
+		if (source[i]->functionObject == toCheck->functionObject)
 			return true;
 	}
 	return false;
@@ -144,7 +145,7 @@ bool FC_SimpleTasker::checkIfContain(Task** source, int amt, Task* toCheck)
 //	Timer2.attachInterrupt(TIMER_CH1, baseLoopTimerHandler);
 //	*/
 //	
-//	mainTask.functionPointer = mainFuncPointer;
+//	mainTask.functionObject = mainFuncPointer;
 //	mainTask.interval = interv;
 //	mainTask.maxDuration = maxDur;
 //	
@@ -163,7 +164,7 @@ bool FC_SimpleTasker::checkIfContain(Task** source, int amt, Task* toCheck)
 //// Executed once. Add the main task
 //void FC_Tasker::addMainFunction( void (*mainFuncPointer)(), long interv, uint16_t maxDur )
 //{
-//	mainTask.functionPointer = mainFuncPointer;
+//	mainTask.functionObject = mainFuncPointer;
 //	mainTask.interval = interv;
 //	mainTask.maxDuration = maxDur;
 //}
@@ -179,7 +180,7 @@ bool FC_SimpleTasker::checkIfContain(Task** source, int amt, Task* toCheck)
 //		mainTask.lastExecuteTime = micros();
 //		
 //		// execute the main task
-//		(*mainTask.functionPointer)();
+//		(*mainTask.functionObject)();
 //		
 //		mainTaskDuration = micros() - mainTask.lastExecuteTime;
 //		

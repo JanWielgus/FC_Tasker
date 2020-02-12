@@ -18,6 +18,43 @@
 
 
 
+
+template < typename T >
+class SimpleSmartPointer
+{
+private:
+	T* pData; // Generic pointer to be stored
+public:
+	SimpleSmartPointer(T* pValue) : pData(pValue)
+	{
+	}
+
+	~SimpleSmartPointer()
+	{
+		delete pData;
+	}
+	/*
+	T& operator* ()
+	{
+		return *pData;
+	}
+
+	T* operator-> ()
+	{
+		return pData;
+	}
+	*/
+
+	T* getPtr() const
+	{
+		return pData;
+	}
+};
+
+
+
+
+
 // http://www.cplusplus.com/articles/oz18T05o/
 
 class SimpleFunctionObject
@@ -49,7 +86,7 @@ private:
 		}
 	};
 
-	ObjectConcept* object;
+	SimpleSmartPointer<ObjectConcept> object;
 
 public:
 	template <typename T>
@@ -58,26 +95,25 @@ public:
 	{
 	}
 
-	~SimpleFunctionObject()
-	{
-		delete object;
-	}
-
 	void functionCall_concept() const
 	{
-		object->functionCall_concept();
+		object.getPtr()->functionCall_concept();
+		//object->functionCall_concept();
 	}
 };
+
+
+
 
 
 class FC_SimpleTasker
 {
 public:
-	typedef void(*functionPointerType)();
+	//typedef void(*functionPointerType)();
 
 	FC_SimpleTasker();
 	~FC_SimpleTasker();
-	void addFunction(functionPointerType funcPointer, long interv, uint16_t maxDur );
+	void addFunction(SimpleFunctionObject functionObject, long interv, uint16_t maxDur );
 	void scheduleTasks(); // plan the tasks shifts
 	virtual void runTasker(); // should be the only function in loop. Execute tasks in intelligent way, not everything at one time
 	
@@ -85,7 +121,7 @@ public:
  protected:
 	struct Task
 	{
-		functionPointerType functionPointer; // pointer to the function
+		SimpleFunctionObject functionObject; // pointer to the function
 		long interval; // in milliseconds
 		uint16_t maxDuration; // in milliseconds - input by user
 		uint32_t lastExecuteTime; // in microseconds, time when this function was lately called
@@ -97,7 +133,7 @@ public:
 	const uint8_t MAX_AMT_OF_TASKS = 250;
 	const uint8_t TIME_SHIFT_BASE = 239; // used to calculate time shift
 	
-	Task * taskList = nullptr; // dynamically created, list of tasks, except main task (it is in other pointer)
+	Task* taskList = nullptr; // dynamically created, list of tasks, except main task (it is in other pointer)
 	uint8_t amtOfTasks = 0;
 	
 	void copyTaskList(Task *from, Task *to, uint8_t amount);
