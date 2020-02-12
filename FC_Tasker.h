@@ -17,12 +17,67 @@
 #endif
 
 
+
+// http://www.cplusplus.com/articles/oz18T05o/
+
+class SimpleFunctionObject
+{
+private:
+	struct ObjectConcept
+	{
+		virtual ~ObjectConcept() {}
+		virtual void functionCall_concept() const = 0;
+	};
+
+	template <typename T>
+	struct ObjectModel : ObjectConcept
+	{
+	private:
+		T object;
+
+	public:
+		ObjectModel(const T& t)
+			: object(t)
+		{
+		}
+
+		virtual ~ObjectModel() {}
+
+		virtual void functionCall_concept() const
+		{
+			object();
+		}
+	};
+
+	ObjectConcept* object;
+
+public:
+	template <typename T>
+	SimpleFunctionObject(const T& functionObject)
+		: object(new ObjectModel<T>(functionObject))
+	{
+	}
+
+	~SimpleFunctionObject()
+	{
+		delete object;
+	}
+
+	void functionCall_concept() const
+	{
+		object->functionCall_concept();
+	}
+};
+
+
 class FC_SimpleTasker
 {
- public:
+public:
+	typedef void(*functionPointerType)();
+
 	FC_SimpleTasker();
 	~FC_SimpleTasker();
-	void addFunction( void (*funcPointer)(), long interv, uint16_t maxDur );
+	void addFunction(functionPointerType funcPointer, long interv, uint16_t maxDur );
 	void scheduleTasks(); // plan the tasks shifts
 	virtual void runTasker(); // should be the only function in loop. Execute tasks in intelligent way, not everything at one time
 	
@@ -30,7 +85,7 @@ class FC_SimpleTasker
  protected:
 	struct Task
 	{
-		void (*functionPointer)(); // pointer to the function
+		functionPointerType functionPointer; // pointer to the function
 		long interval; // in milliseconds
 		uint16_t maxDuration; // in milliseconds - input by user
 		uint32_t lastExecuteTime; // in microseconds, time when this function was lately called

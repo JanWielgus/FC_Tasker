@@ -23,11 +23,11 @@ FC_SimpleTasker::~FC_SimpleTasker()
 
 
 // Add a new task at the end of dynamically created array
-void FC_SimpleTasker::addFunction( void (*funcPointer)(), long interv, uint16_t maxDur )
+void FC_SimpleTasker::addFunction( functionPointerType funcPointer, long interv, uint16_t maxDur )
 {
 	// check if there is too much tasks
 	if (amtOfTasks+1 > MAX_AMT_OF_TASKS)
-	return;
+		return;
 	
 	amtOfTasks++;
 	
