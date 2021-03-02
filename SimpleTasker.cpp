@@ -52,22 +52,37 @@ bool SimpleTasker::addTask(Task* task, float frequency)
 
 uint32_t SimpleTasker::getCurrentTime_micros()
 {
-    return currentTime;
+    return lastLoopTime;
 }
 
 
 void SimpleTasker::runLoop()
 {
-    currentTime = micros();
+    lastLoopTime = micros();
+    uint32_t executedTasksTotalInterval = 0; // summed intervals of executed tasks in this loop
 
     for (uint8_t i=0; i < amtOfTasks; i++)
     {
-        if (currentTime >= tasksArray[i]->nextExecutionTime_us)
+        if (lastLoopTime >= tasksArray[i]->nextExecutionTime_us)
         {
-            tasksArray[i]->nextExecutionTime_us = currentTime + tasksArray[i]->interval_us;
+            tasksArray[i]->nextExecutionTime_us = lastLoopTime + tasksArray[i]->interval_us;
             tasksArray[i]->execute();
+
+            executedTasksTotalInterval += tasksArray[i]->interval_us;
         }
     }
+
+    // update tasker load
+    uint32_t executionsTotalTime = micros() - lastLoopTime;
+    if (executedTasksTotalInterval > 0)
+        taskerLoad = LoadFilterBeta*taskerLoad + (1-LoadFilterBeta)*((float)executionsTotalTime / executedTasksTotalInterval);
+    lastLoopTime += executionsTotalTime; // make time in this variable more recent
+}
+
+
+float SimpleTasker::getTaskerLoad()
+{
+    return taskerLoad * 100.f;
 }
 
 

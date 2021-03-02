@@ -12,14 +12,19 @@
 #include <ITasker.h>
 #include <Task.h>
 
+// TODO: maxDuration is probably useless, remove it from code   
+
 
 class SimpleTasker : public ITasker, public Task
 {
 protected:
     const uint8_t MaxAmtOfTasks;
-    Task** tasksArray; // static array of MaxAmtOfTasks size
+    Task** tasksArray; // array of MaxAmtOfTasks size
     uint8_t amtOfTasks = 0; // current amount of tasks (at most MaxAmtOfTasks)
-    uint32_t currentTime = 0; // current time (used in run() method)
+    uint32_t lastLoopTime = 0; // current time (used in run() method)
+
+    const float LoadFilterBeta = 0.999f;
+    float taskerLoad = 0; // 0 - 0%, 1 - 100%, theoretically could be higher
 
 
 public:
@@ -57,6 +62,11 @@ public:
      * 
      */
     void runLoop() override;
+
+    /**
+     * @return Tasker load in percents.
+     */
+    float getTaskerLoad(); // TODO: if this feature is workign, add it to the interface
 
 
 protected:
